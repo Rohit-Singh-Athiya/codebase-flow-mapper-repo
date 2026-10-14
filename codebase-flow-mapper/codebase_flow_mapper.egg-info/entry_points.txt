@@ -1,0 +1,2 @@
+[console_scripts]
+codeflow = codeflow.codeflow:main

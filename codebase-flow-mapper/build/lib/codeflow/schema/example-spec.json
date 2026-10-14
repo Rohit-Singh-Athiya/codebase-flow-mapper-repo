@@ -1,0 +1,30 @@
+{
+  "repo_name": "acme-checkout",
+  "tagline": "An Express API that takes orders and charges payments, with a Playwright end-to-end suite.",
+  "repo_types": ["backend", "test-automation"],
+  "stack": ["TypeScript", "Express", "Playwright"],
+  "start_here": [
+    {"path": "README.md", "why": "setup and the team's own overview"},
+    {"path": "src/server.ts", "why": "where the app boots and mounts routes"}
+  ],
+  "diagrams": [
+    {
+      "id": "context", "level": 0, "title": "How acme-checkout fits together",
+      "summary": "Clients call the API, which charges an external payment provider and stores orders.",
+      "mermaid": "flowchart LR\n  client[\"Browser\"] -->|\"POST /orders\"| api[\"Checkout API\"]\n  api -->|\"charge\"| pay[\"Payment provider (external)\"]\n  api -->|\"save\"| db[(\"Database\")]\n  e2e[\"Playwright suite\"] -->|\"drives\"| api",
+      "components": [
+        {"name": "Checkout API", "path": "src/", "role": "HTTP API for orders"},
+        {"name": "Playwright suite", "path": "tests/", "role": "End-to-end tests"}
+      ]
+    },
+    {
+      "id": "order-flow", "level": 2, "title": "Placing an order",
+      "summary": "One request from route to database.",
+      "mermaid": "sequenceDiagram\n  participant C as Client\n  participant R as routes\n  participant S as services/orders\n  C->>R: POST /orders\n  R->>S: createOrder\n  S-->>C: order JSON"
+    }
+  ],
+  "where_to_change": [{"task": "Add an endpoint", "paths": ["src/routes/"], "notes": "Mount it in the router index."}],
+  "glossary": [{"term": "Order", "meaning": "A paid purchase created by POST /orders."}],
+  "gotchas": ["Imports use a path alias defined in tsconfig.json."],
+  "open_questions": ["How do background jobs get scheduled? Nothing in what was read shows it."]
+}

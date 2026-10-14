@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codebase-flow-mapper"
+version = "0.2.0"
+description = "Generate layered HTML onboarding maps for software repositories"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Operating System :: OS Independent",
+]
+
+[project.scripts]
+codeflow = "codeflow.codeflow:main"
+
+[tool.setuptools]
+packages = ["codeflow"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+codeflow = [
+  "PLAYBOOK.md",
+  "LICENSE",
+  "THIRD_PARTY_NOTICES.md",
+  "assets/report_template.html",
+  "assets/fonts/*",
+  "references/*.md",
+  "schema/*.json",
+]

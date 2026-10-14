@@ -1,0 +1,2 @@
+{ // comment
+  "compilerOptions": {"baseUrl": ".", "paths": {"@db/*": ["src/db/*"]}}}

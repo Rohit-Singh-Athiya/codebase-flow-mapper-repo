@@ -1,0 +1,149 @@
+{
+ "repo_name": "demo-checkout",
+ "tagline": "An Express API that takes orders and charges payments, with a Playwright end-to-end suite and a small Python worker.",
+ "repo_types": [
+  "backend",
+  "test-automation"
+ ],
+ "stack": [
+  "TypeScript",
+  "Express",
+  "Prisma",
+  "Playwright",
+  "Python"
+ ],
+ "start_here": [
+  {
+   "path": "README.md",
+   "why": "the team's own overview"
+  },
+  {
+   "path": "src/server.ts",
+   "why": "boots the app, mounts routes and opens the database connection"
+  },
+  {
+   "path": "src/services/orders.ts",
+   "why": "the core business flow: charge, then save"
+  },
+  {
+   "path": "tests/checkout.spec.ts",
+   "why": "how the end-to-end suite exercises it"
+  }
+ ],
+ "diagrams": [
+  {
+   "id": "context",
+   "level": 0,
+   "title": "How demo-checkout fits together",
+   "summary": "Browsers call the API, which charges an external payment provider and stores orders. CI runs the Playwright suite against it; a Python worker runs background jobs.",
+   "mermaid": "flowchart LR\n  user[\"Browser / client\"] -->|\"POST /orders\"| api[\"Checkout API (Express)\"]\n  subgraph runtime[\"Runs in production\"]\n    api -->|\"charge\"| pay[\"Payment provider (external)\"]\n    api -->|\"save\"| db[(\"Database via Prisma\")]\n    worker[\"Python worker\"] -.->|\"reads\"| db\n  end\n  ci[\"CI: GitHub Actions\"] -->|\"runs\"| e2e[\"Playwright suite\"]\n  e2e -->|\"drives\"| api",
+   "legend": "Dashed line: link inferred from naming, not from visible code.",
+   "confidence": "inferred",
+   "components": [
+    {
+     "name": "Checkout API",
+     "path": "src",
+     "role": "HTTP API for orders",
+     "confidence": "observed"
+    },
+    {
+     "name": "Playwright suite",
+     "path": "tests",
+     "role": "End-to-end tests",
+     "confidence": "observed"
+    },
+    {
+     "name": "Python worker",
+     "path": "worker",
+     "role": "Background jobs such as emails and cleanup",
+     "confidence": "observed"
+    },
+    {
+     "name": "Database",
+     "path": "src/db",
+     "role": "Prisma client wrapper",
+     "confidence": "inferred"
+    }
+   ]
+  },
+  {
+   "id": "api-layers",
+   "level": 1,
+   "title": "Inside the API",
+   "summary": "Requests flow from routes to services to the db layer. Nothing depends back upward.",
+   "mermaid": "flowchart TD\n  server[\"server.ts (boot)\"] --> routes[\"routes/\"]\n  server --> db[\"db/\"]\n  routes --> services[\"services/\"]\n  services --> db",
+   "components": [
+    {
+     "name": "routes",
+     "path": "src/routes",
+     "role": "Maps URLs to handlers"
+    },
+    {
+     "name": "services",
+     "path": "src/services",
+     "role": "Business logic: orders, payments"
+    },
+    {
+     "name": "db",
+     "path": "src/db",
+     "role": "Database access"
+    }
+   ]
+  },
+  {
+   "id": "order-flow",
+   "level": 2,
+   "title": "Placing an order",
+   "summary": "One POST /orders request from route to database.",
+   "mermaid": "sequenceDiagram\n  participant C as Client\n  participant R as routes\n  participant S as services/orders\n  participant P as Payment provider\n  participant D as db\n  C->>R: POST /orders\n  R->>S: createOrder\n  S->>P: charge\n  S->>D: save\n  S-->>C: order JSON",
+   "components": []
+  }
+ ],
+ "where_to_change": [
+  {
+   "task": "Add an endpoint",
+   "paths": [
+    "src/routes/",
+    "src/services/"
+   ],
+   "notes": "Mount it in src/routes/index.ts"
+  },
+  {
+   "task": "Add a payment provider",
+   "paths": [
+    "src/services/payments.ts"
+   ],
+   "notes": "Charging is isolated here, so a new provider should only need this file plus config."
+  },
+  {
+   "task": "Add an end-to-end test",
+   "paths": [
+    "tests/checkout.spec.ts",
+    "tests/pages/",
+    "tests/fixtures/index.ts"
+   ],
+   "notes": "Reuse the checkout fixture; add page objects under tests/pages/."
+  }
+ ],
+ "glossary": [
+  {
+   "term": "Order",
+   "meaning": "A paid purchase created by POST /orders."
+  },
+  {
+   "term": "Fixture",
+   "meaning": "A Playwright helper that prepares objects (like a page object) for each test and cleans up afterwards."
+  },
+  {
+   "term": "Worker",
+   "meaning": "The Python process in worker/ that runs background jobs such as sending emails and cleanup."
+  }
+ ],
+ "gotchas": [
+  "Imports use the @db/* alias defined in tsconfig.json.",
+  "The worker is Python while everything else is TypeScript, so changes to shared data shapes need updating in both places."
+ ],
+ "open_questions": [
+  "How does the worker get its jobs? Nothing in the repo shows a queue."
+ ]
+}

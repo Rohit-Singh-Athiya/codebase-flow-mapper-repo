@@ -1,0 +1,75 @@
+{
+  "repo_name": "express",
+  "tagline": "A fast, minimalist web framework for Node.js, published as an npm package, with its own Mocha test suite and a large folder of runnable examples.",
+  "repo_types": ["library"],
+  "stack": ["JavaScript", "Node.js", "Mocha", "GitHub Actions"],
+  "start_here": [
+    {"path": "Readme.md", "why": "what Express is, installation and the quick-start example"},
+    {"path": "index.js", "why": "the package entry point: it only re-exports ./lib/express"},
+    {"path": "lib/express.js", "why": "what index.js loads; the framework's real starting point"},
+    {"path": "package.json", "why": "the scripts that run lint and the test suite, and the runtime dependencies"},
+    {"path": "test/app.js", "why": "shows how the framework is exercised in tests: require the package, build an app, assert with supertest"}
+  ],
+  "diagrams": [
+    {
+      "id": "context", "level": 0, "title": "Express in context",
+      "summary": "Applications require the package, which loads its code from lib/ and relies on small npm dependencies. The repo also holds its own test suite and runnable examples, and GitHub Actions runs lint and tests.",
+      "mermaid": "flowchart LR\n  app[\"Your Node.js app\"] -->|\"require('express')\"| entry[\"index.js\"]\n  subgraph repo[\"This repository\"]\n    entry -->|\"re-exports\"| lib[\"lib/\"]\n    tests[\"test/ (Mocha + supertest)\"] -->|\"exercises\"| entry\n    examples[\"examples/\"] -.->|\"demonstrate\"| lib\n  end\n  lib -->|\"uses\"| deps[\"npm dependencies (router, debug, accepts, ...)\"]\n  ci[\"GitHub Actions\"] -->|\"runs lint and tests\"| tests\n  ci -.->|\"publishes\"| npm[\"npm registry\"]",
+      "legend": "Dashed lines are inferred from names, not from code that was read.",
+      "confidence": "inferred",
+      "components": [
+        {"name": "Package entry", "path": "index.js", "role": "Re-exports ./lib/express", "confidence": "observed"},
+        {"name": "Framework code", "path": "lib", "role": "The framework implementation (six files)", "confidence": "observed"},
+        {"name": "Test suite", "path": "test", "role": "Mocha tests run with supertest", "confidence": "observed"},
+        {"name": "Examples", "path": "examples", "role": "Small runnable apps showing features such as auth, sessions and MVC", "confidence": "inferred"},
+        {"name": "CI workflows", "path": ".github/workflows/ci.yml", "role": "Runs lint and tests on push and pull requests", "confidence": "observed"},
+        {"name": "Publish workflow", "path": ".github/workflows/npm-publish.yml", "role": "Presumably publishes releases to npm", "confidence": "inferred"}
+      ]
+    },
+    {
+      "id": "package-layout", "level": 1, "title": "Inside the package",
+      "summary": "index.js hands off to lib/express.js. The other files in lib/ are named for the pieces of an HTTP framework, but the links between them were not read.",
+      "mermaid": "flowchart TD\n  idx[\"index.js\"] --> exp[\"lib/express.js\"]\n  exp -.-> app[\"lib/application.js\"]\n  exp -.-> req[\"lib/request.js\"]\n  exp -.-> res[\"lib/response.js\"]\n  app -.-> view[\"lib/view.js\"]\n  app -.-> utils[\"lib/utils.js\"]",
+      "legend": "Only index.js to lib/express.js was seen in code. Every dashed link is inferred from file names.",
+      "confidence": "inferred",
+      "components": [
+        {"name": "express.js", "path": "lib/express.js", "role": "Loaded by index.js; builds the exported framework", "confidence": "observed"},
+        {"name": "application.js", "path": "lib/application.js", "role": "Probably the application object", "confidence": "inferred"},
+        {"name": "request.js", "path": "lib/request.js", "role": "Probably the request prototype", "confidence": "inferred"},
+        {"name": "response.js", "path": "lib/response.js", "role": "Probably the response prototype", "confidence": "inferred"},
+        {"name": "view.js", "path": "lib/view.js", "role": "Probably template view lookup and rendering", "confidence": "inferred"},
+        {"name": "utils.js", "path": "lib/utils.js", "role": "Probably shared helpers", "confidence": "inferred"}
+      ]
+    },
+    {
+      "id": "test-run", "level": 2, "title": "What happens on npm test",
+      "summary": "The test script runs Mocha over test/ and test/acceptance/, loading test/support/env first, with leak checking on.",
+      "mermaid": "sequenceDiagram\n  participant D as Developer or CI\n  participant N as npm test\n  participant M as Mocha\n  participant T as test/ and test/acceptance/\n  participant E as index.js\n  D->>N: npm test\n  N->>M: mocha --require test/support/env --check-leaks\n  M->>T: load spec files\n  T->>E: require('..') and build an app\n  T->>E: supertest request, assert response\n  M-->>D: spec report",
+      "components": [
+        {"name": "Test script", "path": "package.json", "role": "Defines the test, lint and coverage scripts", "confidence": "observed"},
+        {"name": "Test environment setup", "path": "test/support", "role": "Loaded before the tests via --require", "confidence": "observed"},
+        {"name": "Unit-style tests", "path": "test", "role": "Mocha specs such as test/app.js", "confidence": "observed"},
+        {"name": "Acceptance tests", "path": "test/acceptance", "role": "End-to-end style specs run in the same command", "confidence": "observed"}
+      ]
+    }
+  ],
+  "where_to_change": [
+    {"task": "Change core framework behaviour", "paths": ["lib/"], "notes": "Start from lib/express.js; roles of the other files are inferred."},
+    {"task": "Add or change a test", "paths": ["test/", "test/acceptance/"], "notes": "test/app.js shows the pattern; remember --check-leaks fails tests that leak globals."},
+    {"task": "Add a runnable example", "paths": ["examples/"], "notes": "Each example is a folder; list it in examples/README.md."},
+    {"task": "Change what CI runs", "paths": [".github/workflows/ci.yml"], "notes": "Lint and tests run here; other workflows handle security scanning and publishing."}
+  ],
+  "glossary": [
+    {"term": "supertest", "meaning": "A test helper used in test/ to send HTTP requests to an app and assert on the response."},
+    {"term": "Acceptance tests", "meaning": "The specs under test/acceptance/, run together with the others by npm test."}
+  ],
+  "gotchas": [
+    "npm test runs Mocha with --check-leaks, so a test that creates a global variable will fail.",
+    "examples/ holds about 80 files, far more than lib/. Don't mistake it for the framework."
+  ],
+  "open_questions": [
+    "What each file in lib/ does and how they depend on each other: only names were seen.",
+    "How routing is implemented: lib/ imports an external router package, but no routing code was read.",
+    "What legacy.yml and npm-publish.yml do exactly."
+  ]
+}

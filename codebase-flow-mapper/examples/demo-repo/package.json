@@ -1,0 +1,2 @@
+{"name":"demo-checkout","private":true,"scripts":{"start":"node dist/server.js","test:e2e":"playwright test","build":"tsc"},
+ "dependencies":{"express":"^4.19.0","@prisma/client":"^5.0.0"},"devDependencies":{"@playwright/test":"^1.48.0","typescript":"^5.5.0"}}

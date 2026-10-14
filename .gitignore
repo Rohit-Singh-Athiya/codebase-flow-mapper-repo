@@ -6,3 +6,5 @@ examples/output/
 *.skill
 .codeflow/
 dist/
+build/
+*.egg-info/

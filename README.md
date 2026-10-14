@@ -4,9 +4,9 @@
 
 An open-source toolkit that scans a repository and produces one self-contained HTML page: layered flow diagrams, a "start here" reading order, a component table, a glossary and a "where do I change X?" guide. The scripts are plain Python, the instructions are plain Markdown, and any model (hosted, local, in a chat window or inside an IDE) can supply the one step that needs judgement.
 
-**[Live example](https://YOUR-USERNAME.github.io/codebase-flow-mapper/)**, generated from the small demo repo in [`examples/`](examples/demo-repo).
+**[Live example](https://Rohit-Singh-Athiya.github.io/codebase-flow-mapper-repo/)**, generated from the small demo repo in [`examples/`](examples/demo-repo).
 
-> Before publishing, replace the GitHub owner/repository placeholders and `YOUR NAME` in the MIT license.
+> Before publishing, replace `YOUR NAME` in the MIT license with the copyright holder's preferred name.
 
 ![A generated page: system-context diagram with the zoom-level title block](docs/images/overview-light.png)
 
@@ -36,10 +36,22 @@ The only judgement-heavy step is writing the spec (which diagrams, what each par
 
 ## One-command CLI
 
-Install `pipx` first if needed, then install the CLI from GitHub (replace `OWNER/REPO` with its GitHub path):
+After the first release is published, the simplest install is:
 
 ```bash
-pipx install "git+https://github.com/OWNER/REPO.git"
+pipx install codebase-flow-mapper
+```
+
+Or use pip:
+
+```bash
+python -m pip install codebase-flow-mapper
+```
+
+To install the latest unreleased code from GitHub instead:
+
+```bash
+pipx install "git+https://github.com/Rohit-Singh-Athiya/codebase-flow-mapper-repo.git"
 ```
 
 Configure an API key and model supported by an OpenAI-compatible Chat Completions API. In PowerShell:
@@ -49,9 +61,15 @@ $env:CODEFLOW_API_KEY = "your-api-key"
 $env:CODEFLOW_MODEL = "your-provider-model"
 ```
 
-These PowerShell assignments last for the current terminal session. For a persistent setup, add both values as
-user environment variables in Windows Settings, then open a new terminal. On macOS/Linux, export them in your
-shell profile.
+On macOS/Linux, configure the same settings in the shell:
+
+```bash
+export CODEFLOW_API_KEY="your-api-key"
+export CODEFLOW_MODEL="your-provider-model"
+```
+
+These assignments last for the current terminal session. For a persistent setup, add them to your shell profile
+or user environment variables; do not put the API key in a project file or commit it.
 
 For other compatible providers, set `CODEFLOW_API_BASE_URL` to their API base URL (it should end in `/v1`).
 Keep the API key in an environment variable; do not commit it to a repository.
@@ -70,25 +88,33 @@ when you have reviewed the privacy implications and need to skip the interactive
 The context pack uses best-effort secret redaction, not a guarantee. Review your provider's data-handling terms
 before sending private or regulated source code. API usage may incur charges from the provider.
 
+### First PyPI release setup (maintainers)
+
+The package can be installed from GitHub immediately, but `pipx install codebase-flow-mapper` works only after
+the name is available on PyPI and the first release is published. Configure PyPI Trusted Publishing for this
+GitHub repository using the `pypi` environment and `.github/workflows/publish.yml` workflow, then create a GitHub
+release with a tag matching the version in `pyproject.toml` (for example, `v0.2.0`). The workflow builds and
+publishes the package without storing a PyPI password or API token in GitHub secrets.
+
 ## Quick start: pick the path that matches your AI
 
 Get the code first:
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/codebase-flow-mapper.git
+git clone https://github.com/Rohit-Singh-Athiya/codebase-flow-mapper-repo.git
 ```
 
 ### 1. Chat only (ChatGPT, Gemini, Claude.ai, a local model, anything that takes text)
 
 ```bash
-python3 codebase-flow-mapper/codeflow/codeflow.py pack /path/to/your/repo
+python3 codeflow/codeflow.py pack /path/to/your/repo
 # -> .codeflow/context-pack.md  (up to about 15k tokens)
 ```
 
 Paste or upload that file to the model. It replies with a single JSON object. Save it as `spec.json`, then:
 
 ```bash
-python3 codebase-flow-mapper/codeflow/codeflow.py render spec.json --repo /path/to/your/repo --out codebase-map.html
+python3 codeflow/codeflow.py render spec.json --repo /path/to/your/repo --out codebase-map.html
 ```
 
 The renderer lists any file path the model cited that doesn't exist. Paste those warnings back to the model and ask it to resend the JSON. Open `codebase-map.html` in a browser.
@@ -97,7 +123,7 @@ The renderer lists any file path the model cited that doesn't exist. Paste those
 
 ```bash
 cd /path/to/your/repo
-python3 /path/to/codebase-flow-mapper/codeflow/codeflow.py install agents    # or: cursor | copilot | gemini | claude
+codeflow install agents    # or: cursor | copilot | gemini | claude
 ```
 
 Then ask: *"Map this repo for a new joiner."* The generated instructions tell the agent to read the playbook, run `scan`, read selectively, write the spec and run `render`.
@@ -114,7 +140,7 @@ Installs are idempotent and append to existing files between `codeflow:begin/end
 
 ### 3. Claude.ai
 
-Run `python3 codeflow/codeflow.py build-skill` (or download `codebase-flow-mapper.skill` from the [latest release](../../releases/latest)) and upload it in Claude's skills settings.
+Run `codeflow build-skill` (or download `codebase-flow-mapper.skill` from the [latest release](../../releases/latest)) and upload it in Claude's skills settings.
 
 ## Commands
 

@@ -183,6 +183,12 @@ class Install(unittest.TestCase):
         for name in ("PLAYBOOK.md", "LICENSE", "THIRD_PARTY_NOTICES.md"):
             self.assertEqual(read(os.path.join(ROOT, name)), read(os.path.join(ROOT, "codeflow", name)), name)
 
+    def test_packaged_cli_metadata_has_console_command(self):
+        config = read(os.path.join(ROOT, "pyproject.toml"))
+        self.assertIn('name = "codebase-flow-mapper"', config)
+        self.assertIn('codeflow = "codeflow.codeflow:main"', config)
+        self.assertIn('requires-python = ">=3.9"', config)
+
 
 class OneCommandMap(unittest.TestCase):
     def test_map_calls_api_and_writes_html(self):
